@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全話題一覧 - REALITY 話題ルーレット</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        .full-list-container {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .full-list-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .full-list-header h1 {
+            color: var(--primary-color);
+            text-shadow: 0 0 15px var(--primary-glow);
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .full-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .full-list .topic-item {
+            background: rgba(30, 41, 59, 0.8);
+            border-left-color: var(--primary-color);
+            opacity: 1;
+        }
+
+        .full-list .topic-item.used-mark {
+            border-left-color: var(--used-color);
+            opacity: 0.6;
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .used-badge {
+            display: inline-block;
+            background: var(--used-color);
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            vertical-align: middle;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container full-list-container">
+        <header class="full-list-header">
+            <h1>ALL TOPICS DATABASE</h1>
+            <div style="margin-top:20px;">
+                <a href="edit.html" style="color:var(--primary-color); text-decoration:underline;">✏️ 話題を編集する</a>
+                <span style="color:#94a3b8; margin:0 10px;">|</span>
+                <a href="index.html" style="color:var(--primary-color); text-decoration:underline;">🔙 ルーレットに戻る</a>
+            </div>
+        </header>
+        <ul id="fullTopicList" class="full-list"></ul>
+
+        <footer class="app-footer">
+            <p>制作者: 煙屋紫煙 / X (Twitter): <a href="https://twitter.com/shien_kemuriya" target="_blank"
+                    rel="noopener noreferrer">@shien_kemuriya</a></p>
+        </footer>
+    </div>
+    <script src="data.js"></script>
+    <script>
+        const listEl = document.getElementById('fullTopicList');
+
+        // localStorageから最新の状態を取得
+        let currentTopics = initialTopics;
+        const saved = localStorage.getItem('reality_roulette_public_state');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.length === initialTopics.length) {
+                    currentTopics = parsed;
+                }
+            } catch (e) { }
+        }
+
+        currentTopics.forEach((topic) => {
+            const li = document.createElement('li');
+            li.className = `topic-item ${topic.used ? 'used-mark' : ''}`;
+
+            const usedBadge = topic.used ? `<span class="used-badge">CLEARED</span>` : '';
+
+            li.innerHTML = `
+                <div class="topic-item-title">${topic.title} ${usedBadge}</div>
+                <div class="topic-item-detail">${topic.detail.replace(/\n/g, '<br>')}</div>
+            `;
+            listEl.appendChild(li);
+        });
+    </script>
+</body>
+
+</html>

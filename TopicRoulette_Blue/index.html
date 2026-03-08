@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REALITY 話題ルーレット</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>SYSTEM://TOPIC_ROULETTE</h1>
+        </header>
+        <main class="layout">
+            <section class="roulette-section">
+                <!-- ルーレット画面 -->
+                <div class="display-area" id="displayArea">
+                    <div class="topic-title" id="topicTitle">READY...</div>
+                    <div class="topic-detail" id="topicDetail">ルーレットを回して話題を決定します。</div>
+                </div>
+                <!-- 操作ボタン -->
+                <div class="controls">
+                    <button id="spinBtn" class="primary-btn">SPIN ROULETTE</button>
+                    <button id="resetBtn" class="secondary-btn">RESET</button>
+                </div>
+            </section>
+
+            <section class="list-section">
+                <div class="list-header">
+                    <h2>Topic Database</h2>
+                    <div>
+                        <a href="edit.html" class="small-link" title="話題を編集・追加する" style="margin-right:10px;">✏️ 編集</a>
+                        <a href="list.html" target="_blank" class="small-link" title="全話題一覧を見る">📋 一覧</a>
+                    </div>
+                </div>
+                <!-- 話題リスト（JSで自動生成） -->
+                <ul id="topicList" class="topic-list">
+                </ul>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>制作者: 煙屋紫煙 / X (Twitter): <a href="https://twitter.com/shien_kemuriya" target="_blank"
+                    rel="noopener noreferrer">@shien_kemuriya</a></p>
+        </footer>
+    </div>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

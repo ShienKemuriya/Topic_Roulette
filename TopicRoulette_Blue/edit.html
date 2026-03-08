@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>話題の編集 - REALITY 話題ルーレット</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        .edit-container {
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .edit-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .edit-header h1 {
+            color: var(--primary-color);
+            text-shadow: 0 0 15px var(--primary-glow);
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #0284c7);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-secondary {
+            background: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #64748b;
+        }
+
+        .btn-danger {
+            background: var(--accent-color);
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .editor-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .editor-item {
+            background: rgba(30, 41, 59, 0.8);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .editor-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .editor-row label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .item-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+
+        .floating-save {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container edit-container">
+        <header class="edit-header">
+            <h1>TOPIC EDITOR</h1>
+            <p style="color: #94a3b8; margin-top: 10px;">
+                話題の追加・編集・削除ができます。<br>CSVファイルでのバックアップ（エクスポート）と読み込み（インポート）にも対応しています。</p>
+        </header>
+
+        <div class="action-bar">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="addBtn">+ 新しい話題を追加</button>
+                <button class="btn btn-secondary" id="resetBtn">初期データに戻す</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="exportBtn">📥 CSVエクスポート</button>
+                <input type="file" id="csvInput" accept=".csv" style="display: none;">
+                <button class="btn btn-secondary" id="importBtn">📤 CSVインポート</button>
+            </div>
+        </div>
+
+        <div id="editorList" class="editor-list">
+            <!-- JavaScriptで描画 -->
+        </div>
+
+        <button class="btn btn-primary floating-save" id="saveBtn">💾 変更を保存する</button>
+
+        <div class="nav-links">
+            <a href="index.html">🔙 ルーレット画面に戻る</a>
+            <a href="list.html">📋 全話題一覧を見る</a>
+        </div>
+
+        <footer class="app-footer">
+            <p>制作者: 煙屋紫煙 / X (Twitter): <a href="https://twitter.com/shien_kemuriya" target="_blank"
+                    rel="noopener noreferrer">@shien_kemuriya</a></p>
+        </footer>
+    </div>
+
+    <!-- csv読み込み用にパパイヤ(PapaParse)等のライブラリを使うと簡単ですが、依存を減らすため自作します -->
+    <script src="data.js"></script>
+    <script>
+        const STORAGE_KEY = 'reality_roulette_public_state';
+        let topicsData = [];
+
+        const editorListEl = document.getElementById('editorList');
+        const addBtn = document.getElementById('addBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const csvInput = document.getElementById('csvInput');
+
+        // 初期化処理
+        function init() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    topicsData = JSON.parse(saved);
+                } catch (e) {
+                    topicsData = JSON.parse(JSON.stringify(initialTopics));
+                }
+            } else {
+                topicsData = JSON.parse(JSON.stringify(initialTopics));
+            }
+            // `used` プロパティがなければ初期化
+            topicsData.forEach(t => {
+                if (t.used === undefined) t.used = false;
+            });
+
+            renderEditor();
+        }
+
+        // 描画
+        function renderEditor() {
+            editorListEl.innerHTML = '';
+            if (topicsData.length === 0) {
+                editorListEl.innerHTML = `<div class="empty-state">話題がありません。「新しい話題を追加」から作成してください。</div>`;
+                return;
+            }
+
+            topicsData.forEach((topic, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'editor-item';
+                itemDiv.innerHTML = `
+                    <div class="editor-row">
+                        <label>話題のタイトル ${topic.used ? '(※使用済み・クリア済)' : ''}</label>
+                        <input type="text" class="topic-title-input" data-index="${index}" value="${escapeHtml(topic.title)}" placeholder="例: 自己紹介">
+                    </div>
+                    <div class="editor-row">
+                        <label>詳細・内容</label>
+                        <textarea class="topic-detail-input" data-index="${index}" placeholder="例: 趣味や特技について話します。">${escapeHtml(topic.detail)}</textarea>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-danger" onclick="deleteTopic(${index})">削除</button>
+                        ${topic.used ? `<button class="btn btn-secondary" style="margin-left:10px;" onclick="unuseTopic(${index})">未クリアに戻す</button>` : ''}
+                    </div>
+                `;
+                editorListEl.appendChild(itemDiv);
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // 入力をデータに反映（保存ボタンを押したとき用）
+        function syncInputToData() {
+            const titles = document.querySelectorAll('.topic-title-input');
+            const details = document.querySelectorAll('.topic-detail-input');
+
+            titles.forEach(input => {
+                const idx = input.getAttribute('data-index');
+                topicsData[idx].title = input.value;
+            });
+            details.forEach(textarea => {
+                const idx = textarea.getAttribute('data-index');
+                topicsData[idx].detail = textarea.value;
+            });
+        }
+
+        // 追加
+        addBtn.addEventListener('click', () => {
+            syncInputToData();
+            topicsData.unshift({ title: '', detail: '', used: false });
+            renderEditor();
+        });
+
+        // 削除（インラインイベント）
+        window.deleteTopic = function (index) {
+            if (confirm('この話題を削除しますか？')) {
+                syncInputToData();
+                topicsData.splice(index, 1);
+                renderEditor();
+            }
+        };
+
+        // クリア状態戻し
+        window.unuseTopic = function (index) {
+            syncInputToData();
+            topicsData[index].used = false;
+            renderEditor();
+        };
+
+        // 保存
+        saveBtn.addEventListener('click', () => {
+            syncInputToData();
+            // バリデーション：空っぽのタイトルは消すか警告
+            const invalid = topicsData.some(t => t.title.trim() === '');
+            if (invalid) {
+                if (!confirm('タイトルが空の話題が含まれています。そのまま保存しますか？')) return;
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(topicsData));
+            alert('保存しました！ルーレット画面に戻って確認してください。');
+        });
+
+        // リセット
+        resetBtn.addEventListener('click', () => {
+            if (confirm('現在の編集内容とクリア状態をすべて破棄し、初期の話題リストに戻しますか？')) {
+                topicsData = JSON.parse(JSON.stringify(initialTopics));
+                renderEditor();
+            }
+        });
+
+        // --- CSV エクスポート ---
+        exportBtn.addEventListener('click', () => {
+            syncInputToData();
+            // CSV ヘッダー (タイトル, 詳細, クリア状態)
+            let csvContent = "タイトル,詳細,クリア状態(TRUE/FALSE)\n";
+
+            topicsData.forEach(row => {
+                // セル内にカンマや改行がある場合を考慮してダブルクオートで囲み、内部のクオートはエスケープ
+                const title = `"${(row.title || '').replace(/"/g, '""')}"`;
+                const detail = `"${(row.detail || '').replace(/"/g, '""')}"`;
+                const used = row.used ? "TRUE" : "FALSE";
+                csvContent += `${title},${detail},${used}\n`;
+            });
+
+            // BOM付きUTF-8 (Excelで文字化けしないため)
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "topics_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // --- CSV インポート ---
+        importBtn.addEventListener('click', () => csvInput.click());
+
+        csvInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                const text = evt.target.result;
+                const parsedData = parseCSV(text);
+
+                if (parsedData && parsedData.length > 0) {
+                    if (confirm(`CSVから ${parsedData.length} 件の話題を読み込みます。現在のリストは上書きされます。よろしいですか？`)) {
+                        topicsData = parsedData;
+                        renderEditor();
+                        alert('インポートが完了しました。「変更を保存する」ボタンを押すと確定します。');
+                    }
+                } else {
+                    alert('CSVフォーマットが不正か、データが空です。');
+                }
+            };
+            reader.readAsText(file);
+            csvInput.value = ''; // リセット
+        });
+
+        // 簡易CSVパーサー
+        function parseCSV(text) {
+            const result = [];
+            // 行を分割するが、セル内の改行を考慮する必要がある
+            let row = [];
+            let inQuotes = false;
+            let currentCell = '';
+
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let nextChar = text[i + 1];
+
+                if (inQuotes) {
+                    if (char === '"' && nextChar === '"') {
+                        currentCell += '"'; // エスケープされたクオート
+                        i++;
+                    } else if (char === '"') {
+                        inQuotes = false;
+                    } else {
+                        currentCell += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        row.push(currentCell);
+                        currentCell = '';
+                    } else if (char === '\n' || char === '\r') {
+                        if (char === '\r' && nextChar === '\n') i++; // CRLF
+                        row.push(currentCell);
+                        if (row.some(c => c.trim() !== '')) { // 空行は無視
+                            result.push(row);
+                        }
+                        row = [];
+                        currentCell = '';
+                    } else {
+                        currentCell += char;
+                    }
+                }
+            }
+            if (currentCell !== '' || row.length > 0) {
+                row.push(currentCell);
+                result.push(row);
+            }
+
+            // 先頭行が「タイトル」からの場合はヘッダとして飛ばす
+            let startIndex = 0;
+            if (result.length > 0 && result[0][0] && result[0][0].includes("タイトル")) {
+                startIndex = 1;
+            }
+
+            // Topicsオブジェクトに変換
+            const parsedTopics = [];
+            for (let i = startIndex; i < result.length; i++) {
+                const r = result[i];
+                if (r.length >= 2 && r[0].trim() !== '') {
+                    parsedTopics.push({
+                        title: r[0],
+                        detail: r[1],
+                        used: (r[2] && r[2].trim().toUpperCase() === 'TRUE') ? true : false
+                    });
+                }
+            }
+            return parsedTopics;
+        }
+
+        // 起動
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
