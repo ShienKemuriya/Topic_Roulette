@@ -87,7 +87,7 @@
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                if (parsed.length === initialTopics.length) {
+                if (Array.isArray(parsed)) {
                     currentTopics = parsed;
                 }
             } catch (e) { }
